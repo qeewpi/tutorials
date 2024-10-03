@@ -12,6 +12,10 @@
             <menuitem id="estate_menu_property_types"
                 name="Property Types"
                 action="estate_property_type_action" />
+
+            <menuitem id="estate_menu_tags"
+                name="Property Tags"
+                action="estate_property_tag_action" />
         </menuitem>
     </menuitem>
 </odoo>
