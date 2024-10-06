@@ -4,5 +4,12 @@ from odoo import api, fields, models
 
 
 class Users(models.Model):
-    _name = 'res.users'
-    _inherit = 'res.users'
+    _name = "res.users"
+    _inherit = "res.users"
+
+    property_ids = fields.One2many(
+        "estate.property",
+        "user_id",
+        string="Properties",
+        domain=["|", ("state", "=", "new"), ("state", "=", "offer_received")],
+    )
