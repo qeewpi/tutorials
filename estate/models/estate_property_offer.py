@@ -10,10 +10,9 @@ class EstatePropertyOffer(models.Model):
     _description = "Real Estate Property Offer"
     _order = "price desc"
 
+    # Field declarations
     price = fields.Float(required=True)
-    status = fields.Selection(
-        [("accepted", "Accepted"), ("refused", "Refused")],
-    )
+    status = fields.Selection([("accepted", "Accepted"), ("refused", "Refused")])
     partner_id = fields.Many2one("res.partner", required=True)
     property_id = fields.Many2one("estate.property", required=True)
     property_type_id = fields.Many2one(related="property_id.property_type_id")
@@ -31,6 +30,7 @@ class EstatePropertyOffer(models.Model):
         ),
     ]
 
+    # Default methods and default_get
     @api.model
     def create(self, vals):
         property_id = vals.get("property_id")
@@ -55,6 +55,7 @@ class EstatePropertyOffer(models.Model):
 
         return super(EstatePropertyOffer, self).create(vals)
 
+    # Compute, inverse, and search methods
     @api.depends("validity")
     def _compute_date_deadline(self):
         for record in self:
@@ -77,6 +78,7 @@ class EstatePropertyOffer(models.Model):
             else:
                 record.validity = (record.date_deadline - fields.Date.today()).days
 
+    # Action methods
     def action_accept(self):
         for record in self:
             if record.property_id.state == "offer_accepted":

@@ -8,6 +8,7 @@ class EstatePropertyType(models.Model):
     _description = "Real Estate Property Type"
     _order = "sequence, name"
 
+    # Field declarations
     name = fields.Char(required=True)
     sequence = fields.Integer(
         "Sequence", default=10, help="Used to order property types"
@@ -20,6 +21,7 @@ class EstatePropertyType(models.Model):
         ("unique_name", "UNIQUE(name)", "Property type name must be unique.")
     ]
 
+    # Compute methods
     def _compute_offer_count(self):
         for record in self:
             record.offer_count = len(record.offer_ids)
@@ -29,6 +31,7 @@ class EstatePropertyTypeLine(models.Model):
     _name = "estate.property.type.line"
     _description = "Real Estate Property Type Line"
 
+    # Field declarations
     property_type_id = fields.Many2one("estate.property.type")
     name = fields.Char()
     expected_price = fields.Float()

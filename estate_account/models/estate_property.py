@@ -1,12 +1,11 @@
 from odoo import models, fields
-import pdb
 
 
 class EstateProperty(models.Model):
     _inherit = "estate.property"
 
+    # Action methods
     def action_mark_sold(self):
-
         res = super().action_mark_sold()
 
         # Create an account move

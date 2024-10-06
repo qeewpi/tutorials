@@ -8,6 +8,7 @@ class EstatePropertyTag(models.Model):
     _description = "Real Estate Property Tag"
     _order = "name"
 
+    # Field declarations
     name = fields.Char(required=True)
     color = fields.Integer()
 

@@ -11,6 +11,20 @@ class EstateProperty(models.Model):
     _description = "Real Estate Property"
     _order = "id desc"
 
+    _sql_constraints = [
+        (
+            "positive_expected_price",
+            "CHECK(expected_price > 0)",
+            "The expected price must be positive and greater than zero.",
+        ),
+        (
+            "positive_selling_price",
+            "CHECK(selling_price > 0)",
+            "The selling price must be positive and greater than zero.",
+        ),
+    ]
+
+    # Field declarations
     name = fields.Char(string="Title", required=True)
     description = fields.Text()
     postcode = fields.Char()
@@ -48,26 +62,13 @@ class EstateProperty(models.Model):
     tag_ids = fields.Many2many("estate.property.tag", string="Property Tags")
     offer_ids = fields.One2many("estate.property.offer", "property_id")
     total_area = fields.Integer(compute="_compute_total_area")
+    best_price = fields.Float(compute="_compute_best_price")
 
-    _sql_constraints = [
-        (
-            "positive_expected_price",
-            "CHECK(expected_price > 0)",
-            "The expected price must be positive and greater than zero.",
-        ),
-        (
-            "positive_selling_price",
-            "CHECK(selling_price > 0)",
-            "The selling price must be positive and greater than zero.",
-        ),
-    ]
-
+    # Compute methods
     @api.depends("living_area", "garden_area")
     def _compute_total_area(self):
         for record in self:
             record.total_area = record.living_area + record.garden_area
-
-    best_price = fields.Float(compute="_compute_best_price")
 
     @api.depends("offer_ids.price")
     def _compute_best_price(self):
@@ -76,6 +77,7 @@ class EstateProperty(models.Model):
                 record.offer_ids and max(record.offer_ids.mapped("price")) or 0
             )
 
+    # Onchange methods
     @api.onchange("garden")
     def _onchange_garden(self):
         if not self.garden:
@@ -85,23 +87,7 @@ class EstateProperty(models.Model):
             self.garden_area = 10
             self.garden_orientation = "north"
 
-    def action_mark_sold(self):
-        for record in self:
-            if self.state == "canceled":
-                raise UserError("Canceled properties cannot be sold.")
-            else:
-                self.state = "sold"
-        return True
-
-    def action_cancel(self):
-        for record in self:
-            if self.state == "sold":
-                raise UserError("Sold properties cannot be canceled.")
-            else:
-                self.state = "canceled"
-                self.offer_ids.write({"status": "refused"})
-        return True
-
+    # Constraints methods
     @api.constrains("selling_price", "expected_price")
     def _check_selling_price(self):
         SELLING_PRICE_THRESHOLD = 0.9
@@ -124,6 +110,7 @@ class EstateProperty(models.Model):
                         "The property must be in state 'Offer Accepted' to set a selling price."
                     )
 
+    # CRUD methods
     def unlink(self):
         for record in self:
             if record.state not in ["new", "canceled"]:
@@ -131,3 +118,21 @@ class EstateProperty(models.Model):
                     "You cannot delete a property that is not new or canceled."
                 )
         return super(EstateProperty, self).unlink()
+
+    # Action methods
+    def action_mark_sold(self):
+        for record in self:
+            if record.state == "canceled":
+                raise UserError("Canceled properties cannot be sold.")
+            else:
+                record.state = "sold"
+        return True
+
+    def action_cancel(self):
+        for record in self:
+            if record.state == "sold":
+                raise UserError("Sold properties cannot be canceled.")
+            else:
+                record.state = "canceled"
+                self.offer_ids.write({"status": "refused"})
+        return True
