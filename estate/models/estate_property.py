@@ -104,11 +104,6 @@ class EstateProperty(models.Model):
                     raise ValidationError(
                         "The selling price cannot be lower than 90% of the expected price."
                     )
-            else:
-                if not tools.float_is_zero(record.selling_price, precision_digits=2):
-                    raise ValidationError(
-                        "The property must be in state 'Offer Accepted' to set a selling price."
-                    )
 
     # CRUD methods
     def unlink(self):
@@ -117,7 +112,7 @@ class EstateProperty(models.Model):
                 raise UserError(
                     "You cannot delete a property that is not new or canceled."
                 )
-        return super(EstateProperty, self).unlink()
+        return super(EstateProperty, self).unlink()         
 
     # Action methods
     def action_mark_sold(self):

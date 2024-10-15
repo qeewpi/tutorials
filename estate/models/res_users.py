@@ -11,5 +11,9 @@ class Users(models.Model):
         "estate.property",
         "user_id",
         string="Properties",
-        domain=["|", ("state", "=", "new"), ("state", "=", "offer_received")],
+        domain=[
+            "|",
+            ("state", "=", "offer_accepted"),
+            ("state", "=", "new"),
+        ],
     )

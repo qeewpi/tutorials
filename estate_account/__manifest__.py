@@ -5,4 +5,7 @@
     "name": "Estate Account",
     "summary": "Estate Account",
     "depends": ["estate", "account"],
+    "data": [
+        "security/ir.model.access.csv",
+    ],
 }

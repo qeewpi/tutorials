@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import fields, models, api
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -40,8 +40,8 @@ class EstatePropertyOffer(models.Model):
 
             if property.state == "offer_accepted":
                 raise ValidationError(
-                    "Cannot add new offers when the property state is 'offer_accepted'."
-                )
+                   "Cannot add new offers when the property state is 'offer_accepted'."
+                ) 
 
             new_offer_price = vals.get("price")
             if new_offer_price:
@@ -56,27 +56,20 @@ class EstatePropertyOffer(models.Model):
         return super(EstatePropertyOffer, self).create(vals)
 
     # Compute, inverse, and search methods
-    @api.depends("validity")
+    @api.depends("create_date", "validity")
     def _compute_date_deadline(self):
-        for record in self:
-            if record.create_date:
-                record.date_deadline = record.create_date + relativedelta.relativedelta(
-                    days=record.validity
-                )
-            else:
-                record.date_deadline = (
-                    fields.Date.today()
-                    + relativedelta.relativedelta(days=record.validity)
-                )
+        for offer in self:
+            date = (
+                offer.create_date.date() if offer.create_date else fields.Date.today()
+            )
+            offer.date_deadline = date + relativedelta(days=offer.validity)
 
     def _inverse_date_deadline(self):
-        for record in self:
-            if record.create_date:
-                record.validity = (
-                    record.date_deadline - record.create_date.date()
-                ).days
-            else:
-                record.validity = (record.date_deadline - fields.Date.today()).days
+        for offer in self:
+            date = (
+                offer.create_date.date() if offer.create_date else fields.Date.today()
+            )
+            offer.validity = (offer.date_deadline - date).days
 
     # Action methods
     def action_accept(self):
